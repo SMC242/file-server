@@ -21,7 +21,7 @@ class Status(Enum):
 class RequestDetails:
     ip: str
     port: int
-    type: RequestType | None
+    type: RequestType
     file_name: str | None
     status: Status
 
