@@ -13,7 +13,7 @@ This is a unviersity project for NOSE. We have to make a file serving service
   - Request type, file name, and sucess/failure
   - Failures should have a one-line error message
 
-## Funtions
+## Functions
 
 Here are the valid requests a client can make from its CLI
 
