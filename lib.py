@@ -1,9 +1,12 @@
 import socket
 from dataclasses import dataclass
 from enum import Enum
+from typing import TypeAlias
 
-# Remove these later - they're for strong typing during development
-class CommandType(Enum):
+FormattedAddress: TypeAlias = str  # !TODO: remove before submitting
+
+# !TODO: remove before submitting
+class RequestType(Enum):
     GET = "get"
     PUT = "put"
     LIST = "list"
@@ -15,14 +18,15 @@ class Status(Enum):
 
 
 @dataclass
-class CommandDetails:
+class RequestDetails:
     ip: str
     port: int
     type: CommandType
+    file_name: str | None
     status: Status
 
 
-def report(details: CommandDetails) -> str:
+def report(details: RequestDetails) -> str:
     pass
 
 
@@ -44,3 +48,7 @@ def send_list(socket: socket.socket, files: list[str]) -> None:
 
 def receive_list(socket: socket.socket) -> None:
     pass
+
+
+def format_address(ip: str, port: int) -> FormattedAddress:
+    return f"{ip}:{port}"
