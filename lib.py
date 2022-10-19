@@ -7,9 +7,9 @@ FormattedAddress: TypeAlias = str  # !TODO: remove before submitting
 
 # !TODO: remove before submitting
 class RequestType(Enum):
-    GET = "get"
-    PUT = "put"
-    LIST = "list"
+    GET = 0
+    PUT = 1
+    LIST = 2
 
 
 class Status(Enum):
