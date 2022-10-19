@@ -21,9 +21,16 @@ class Status(Enum):
 class RequestDetails:
     ip: str
     port: int
-    type: RequestType
+    type: RequestType | None
     file_name: str | None
     status: Status
+
+
+def make_request_details(
+    ip: str, port: int, type: int, file_name: str | None, status: int
+) -> RequestDetails:
+    """Use this instead of the RequestDetails constructor to make removing it easier"""
+    return RequestDetails(ip, port, RequestType(type), file_name, Status(status))
 
 
 def report(details: RequestDetails) -> str:
