@@ -44,7 +44,7 @@ def report(details: RequestDetails) -> str:
 def generate_report(report_dict: dict) -> str:
     report_string = ""
     for key, value in report_dict.items():
-        if isinstance(value, Enum):
+        if isinstance(value, Enum):  # Enums need to be handled slightly differently
             report_string += append_report(key, str(value.name))
         else:
             report_string += append_report(key, str(value))
@@ -57,7 +57,7 @@ def append_report(key: str, value: str):
 
 
 def clean_report_end(report_string: str) -> str:
-    report_string = report_string.strip()
+    report_string = report_string.strip()  # remove trailing whitespace
     if report_string[-1] == ',':  # remove last comma
         report_string = report_string[:-1]
     return report_string
