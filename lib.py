@@ -1,11 +1,13 @@
 import socket
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import TypeAlias
 
 FormattedAddress: TypeAlias = str  # !TODO: remove before submitting
 
 # !TODO: remove before submitting
+
+
 class RequestType(Enum):
     GET = 0
     PUT = 1
@@ -34,14 +36,38 @@ def make_request_details(
 
 
 def report(details: RequestDetails) -> str:
+    report_dict = asdict(details)
+    report_string = generate_report(report_dict)
+    return report_string
+
+
+def generate_report(report_dict: dict) -> str:
+    report_string = ""
+    for key, value in report_dict.items():
+        if isinstance(value, Enum):
+            report_string += append_report(key, str(value.name))
+        else:
+            report_string += append_report(key, str(value))
+    report_string = clean_report_end(report_string)
+    return report_string
+
+
+def append_report(key: str, value: str):
+    return f"{key}: {value}, "
+
+
+def clean_report_end(report_string: str) -> str:
+    report_string = report_string.strip()
+    if report_string[-1] == ',':  # remove last comma
+        report_string = report_string[:-1]
+    return report_string
+
+
+def send_file(socket: socket.socket, file_name: str) -> None:  # TODO Taylor
     pass
 
 
-def send_file(socket: socket.socket, file_name: str) -> None:
-    pass
-
-
-def receive_file(socket: socket.socket) -> None:
+def receive_file(socket: socket.socket) -> None:  # TODO Taylor
     pass
 
 
@@ -59,3 +85,6 @@ def receive_list(socket: socket.socket) -> None:
 
 def format_address(ip: str, port: int) -> FormattedAddress:
     return f"{ip}:{port}"
+
+
+print(report(make_request_details("127.0.0.1", 65, 1, "test_output", 0)))
