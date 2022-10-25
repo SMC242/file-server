@@ -1,21 +1,50 @@
 from argparse import ArgumentParser
 import socket
 
-from request import make_inital_req
+from request import make_inital_req, to_fields, validate_ack
+from lib import qualify, packets_needed, valid_file
 
 
-def get(name: str) -> str:
-    """Create a get message"""
-    return make_inital_req(0, name, 0)
+def parse_ack(response: bytes) -> dict | None:
+    """Validate and convert acknowledgement message into its fields"""
+    fields = to_fields(response.decode("utf-8"))
+    return fields if validate_ack(fields) else None
 
 
-def put(name: str) -> str:
-    """Create a put message"""
-    return make_inital_req(type, name, n)
+def make_requester(ip: str, port: int):
+    """Get a function that will transmit a request of the given type"""
 
+    def request_of(type: str):
+        # The value will either be a file path or True (if --list)
+        def with_arg(arg):
+            if type == "get":
+                code, name, n = 0, arg, 0
+            elif type == "put":
+                if not valid_file(arg):
+                    raise ValueError("Invalid file name")
+                code, name, n = 1, arg, packets_needed(arg)
+            else:
+                code, name, n = 2, "", 0
+            req = make_inital_req(code, name, n)
 
-def put():
-    pass
+            # Any exceptions raised will close the connection
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.connect((ip, port))
+
+                sock.send(req)  # Initial request
+                # Receive acknowledgement
+                ack_fields = parse_ack(sock.recv(PACKET_SIZE))
+                if not ack_fields:
+                    raise ValueError(
+                        "Received invalid response from server. Closing connection..."
+                    )
+                # Report any errors from the server
+                elif ack_fields["status"] == "1":
+                    raise Exception(ack_fields["msg"])
+
+                # TODO: receive/send data
+
+    return request_of
 
 
 def make_requester(ip: str, port: int):
@@ -67,9 +96,12 @@ def main():
 
     for k in commands:
         # NOTE: empty file paths will fall through this (on purpose)
-        if args[k]:
-            print("executing")
-            return commands[k]()
+        if args[k] is None:
+            print("Executing command")
+            try:
+                return commands[k](args[k])
+            except Exception as e:
+                return print(e.message)
 
     # No request made
     print(

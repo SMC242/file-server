@@ -3,7 +3,7 @@ This module handles formatting and parsing requests
 """
 
 
-def make_inital_req(type: str, name: str, n: int) -> str:
+def make_inital_req(type: int, name: str, n: int) -> str:
     return f"{type=} {name=} {n=}"
 
 
@@ -32,6 +32,10 @@ def validate(keys: list[str]):
         return all(k in fields for k in keys)
 
     return inner
+
+
+def validate_type(type: str | int) -> bool:  # Ducks say quack o7
+    return type in {0, 1, 2, "0", "1", "2"}
 
 
 validate_initial = validate(["type", "name", "n"])
