@@ -3,7 +3,7 @@ This module handles formatting and parsing requests
 """
 
 
-def make_inital_req(type: str, name: str, n: int) -> str:
+def make_inital_req(type: int, name: str, n: int) -> str:
     return f"{type=} {name=} {n=}"
 
 
