@@ -42,16 +42,21 @@ def report(details: RequestDetails) -> str:
     pass
 
 
-def send_file(socket: socket.socket, file_name: str) -> None:
+def send_file(socket: socket.socket, packets: int, file_name: str) -> None:
     pass
 
 
-def receive_file(socket: socket.socket) -> None:
+def receive_file(socket: socket.socket, packets: int, out_path: str) -> None:
     pass
 
 
-def list_files(path: str) -> list[str]:
-    pass
+def qualify(name: str) -> str:
+    """Prefix the file path with `files/` to avoid cluttering `/`"""
+    return f"./files/{name}"
+
+
+def list_files() -> list[str]:
+    return os.listdir(qualify(""))
 
 
 def send_list(socket: socket.socket, files: list[str]) -> None:
@@ -64,11 +69,6 @@ def receive_list(socket: socket.socket) -> None:
 
 def format_address(ip: str, port: int) -> FormattedAddress:
     return f"{ip}:{port}"
-
-
-def qualify(name: str) -> str:
-    """Prefix the file path with `files/` to avoid cluttering `/`"""
-    return f"./files/{name}"
 
 
 def valid_file(name: str) -> bool:
