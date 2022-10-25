@@ -4,13 +4,15 @@ import os
 from math import ceil
 
 from request import make_inital_req, to_fields, validate_ack
+from lib import qualify
 
 # 1 KiB
 PACKET_SIZE = 1024
 
 
 def valid_file(name: str) -> bool:
-    return os.path.exists(name) and os.path.isfile(name)
+    qualified = qualify(name)
+    return os.path.exists(qualified) and os.path.isfile(qualified)
 
 
 def packets_needed(file_name: str) -> int:

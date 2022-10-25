@@ -59,3 +59,8 @@ def receive_list(socket: socket.socket) -> None:
 
 def format_address(ip: str, port: int) -> FormattedAddress:
     return f"{ip}:{port}"
+
+
+def qualify(name: str) -> str:
+    """Prefix the file path with `files/` to avoid cluttering `/`"""
+    return f"files/{name}"
