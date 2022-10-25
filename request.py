@@ -34,5 +34,9 @@ def validate(keys: list[str]):
     return inner
 
 
+def validate_type(type: str | int) -> bool:  # Ducks say quack o7
+    return type in {0, 1, 2, "0", "1", "2"}
+
+
 validate_initial = validate(["type", "name", "n"])
 validate_ack = validate(["status", "msg", "n"])
