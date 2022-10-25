@@ -47,20 +47,6 @@ def make_requester(ip: str, port: int):
     return request_of
 
 
-def make_requester(ip: str, port: int):
-    """Get a function that will transmit a request of the given type"""
-    CONVERSIONS = {"get": 0, "put": 1, "list": 2}
-
-    def request_of(type: str):
-        def with_name(file_name: str = ""):
-            type_no = CONVERSIONS[type]
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.connect((ip, port))
-                req = make_inital_req(type_no, file_name, n)
-
-    return request_of
-
-
 def get_args() -> dict:
     parser = ArgumentParser()
     parser.add_argument("ip", type=str, help="IP of server")
