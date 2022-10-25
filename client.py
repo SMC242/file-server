@@ -1,8 +1,35 @@
 from argparse import ArgumentParser
+import socket
+
+from request import make_inital_req
 
 
-def request(type: str) -> None:
+def get(name: str) -> str:
+    """Create a get message"""
+    return make_inital_req(0, name, 0)
+
+
+def put(name: str) -> str:
+    """Create a put message"""
+    return make_inital_req(type, name, n)
+
+
+def put():
     pass
+
+
+def make_requester(ip: str, port: int):
+    """Get a function that will transmit a request of the given type"""
+    CONVERSIONS = {"get": 0, "put": 1, "list": 2}
+
+    def request_of(type: str):
+        def with_name(file_name: str = ""):
+            type_no = CONVERSIONS[type]
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.connect((ip, port))
+                req = make_inital_req(type_no, file_name, n)
+
+    return request_of
 
 
 def get_args() -> dict:
@@ -33,17 +60,16 @@ def get_args() -> dict:
 
 def main():
     REQUEST_TYPES = ("get", "put", "list")
-    COMMANDS = {
-        "get": lambda: request("get"),
-        "put": lambda: request("put"),
-        "list": lambda: request("list"),
-    }
+
     args = get_args()
-    for k in COMMANDS:
+    request_of = make_requester(ip, port)
+    commands = {t: lambda: request_of(t) for t in REQUEST_TYPES}
+
+    for k in commands:
         # NOTE: empty file paths will fall through this (on purpose)
         if args[k]:
             print("executing")
-            return COMMANDS[k]()
+            return commands[k]()
 
     # No request made
     print(

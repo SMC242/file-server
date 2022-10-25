@@ -58,7 +58,7 @@ def append_report(key: str, value: str):
 
 def clean_report_end(report_string: str) -> str:
     report_string = report_string.strip()
-    if report_string[-1] == ',':  # remove last comma
+    if report_string[-1] == ",":  # remove last comma
         report_string = report_string[:-1]
     return report_string
 
@@ -87,4 +87,5 @@ def format_address(ip: str, port: int) -> FormattedAddress:
     return f"{ip}:{port}"
 
 
-print(report(make_request_details("127.0.0.1", 65, 1, "test_output", 0)))
+if __name__ == "__main__":
+    print(report(make_request_details("127.0.0.1", 65, 1, "test_output", 0)))
