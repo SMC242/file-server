@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TypeAlias
 
+# 1 KiB
+PACKET_SIZE = 1024
+
 FormattedAddress: TypeAlias = str  # !TODO: remove before submitting
 
 # !TODO: remove before submitting
@@ -64,3 +67,12 @@ def format_address(ip: str, port: int) -> FormattedAddress:
 def qualify(name: str) -> str:
     """Prefix the file path with `files/` to avoid cluttering `/`"""
     return f"./files/{name}"
+
+
+def valid_file(name: str) -> bool:
+    qualified = qualify(name)
+    return os.path.exists(qualified) and os.path.isfile(qualified)
+
+
+def packets_needed(file_name: str) -> int:
+    return ceil(os.stat(file_name).st_size / PACKET_SIZE)

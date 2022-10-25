@@ -4,19 +4,7 @@ import os
 from math import ceil
 
 from request import make_inital_req, to_fields, validate_ack
-from lib import qualify
-
-# 1 KiB
-PACKET_SIZE = 1024
-
-
-def valid_file(name: str) -> bool:
-    qualified = qualify(name)
-    return os.path.exists(qualified) and os.path.isfile(qualified)
-
-
-def packets_needed(file_name: str) -> int:
-    return ceil(os.stat(file_name).st_size / PACKET_SIZE)
+from lib import qualify, packets_needed, valid_file
 
 
 def parse_ack(response: bytes) -> dict | None:
