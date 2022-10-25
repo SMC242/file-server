@@ -1,7 +1,5 @@
 from argparse import ArgumentParser
 import socket
-import os
-from math import ceil
 
 from request import make_inital_req, to_fields, validate_ack
 from lib import qualify, packets_needed, valid_file
