@@ -63,4 +63,4 @@ def format_address(ip: str, port: int) -> FormattedAddress:
 
 def qualify(name: str) -> str:
     """Prefix the file path with `files/` to avoid cluttering `/`"""
-    return f"files/{name}"
+    return f"./files/{name}"
