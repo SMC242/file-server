@@ -74,6 +74,7 @@ These are the valid messages used in our protocol.
 
 ## List response
 
-`name1 name2 name3` etc
+First packet: `n={<int>}`
+Next `n` packets: `name1 name2 name3 ...`
 
 [^1]: Kibibytes (KiB) are 1024 bits
