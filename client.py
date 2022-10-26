@@ -2,10 +2,7 @@ from argparse import ArgumentParser
 import socket
 
 from request import make_inital_req, to_fields, validate_ack
-from lib import packets_needed, valid_file
-
-# 1 KiB
-PACKET_SIZE = 1024
+from lib import packets_needed, valid_file, PACKET_SIZE
 
 
 def parse_ack(response: bytes) -> dict | None:
