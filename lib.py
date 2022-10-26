@@ -75,8 +75,8 @@ def send_file(
         with open(file_name, "rb") as f:
             for i in range(packets):
                 # read a packet of data at a time
-                byte_array = f.readline(PACKET_SIZE)
-                socket.send(byte_array)
+                byte_array = f.read(PACKET_SIZE)
+                socket.sendall(byte_array)
     except (FileNotFoundError):
         print("file not found")
 
@@ -85,7 +85,7 @@ def receive_file(
     socket: socket.socket, packets: int, out_path: str
 ) -> None:
     try:
-        with open(out_path, "xa") as f:
+        with open(out_path, "xb") as f:
             for i in range(packets):
                 received_btyes = socket.recv(PACKET_SIZE)
                 f.write(received_btyes)
