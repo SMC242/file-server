@@ -71,13 +71,26 @@ def clean_report_end(report_string: str) -> str:
 def send_file(
     socket: socket.socket, packets: int, file_name: str
 ) -> None:  # TODO: Taylor
-    pass
+    try:
+        with open(file_name, "rb") as f:
+            for i in range(packets):
+                # read a packet of data at a time
+                byte_array = f.readline(PACKET_SIZE)
+                socket.send(byte_array)
+    except (FileNotFoundError):
+        print("file not found")
 
 
 def receive_file(
     socket: socket.socket, packets: int, out_path: str
 ) -> None:  # TODO: Taylor
-    pass
+    try:
+        with open(out_path, "xa") as f:
+            for i in range(packets):
+                received_btyes = socket.recv(PACKET_SIZE)
+                f.write(received_btyes)
+    except (FileExistsError):
+        print("file already exists, cannot overwrite")
 
 
 def qualify(name: str) -> str:
@@ -90,11 +103,19 @@ def list_files() -> list[str]:
 
 
 def send_list(socket: socket.socket, files: list[str]) -> None:
-    pass
+    file_list_bytes = ",".join(files).encode("utf-8")
+    socket.send(file_list_bytes)
 
 
 def receive_list(socket: socket.socket) -> None:
-    pass
+    list_as_string = socket.recv(PACKET_SIZE).decode("utf-8")
+    file_list = list_as_string.split(',')
+    print_list(file_list)
+
+
+def print_list(list: list[str]) -> None:
+    for i in list:
+        print(i)
 
 
 def format_address(ip: str, port: int) -> FormattedAddress:
