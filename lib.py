@@ -132,4 +132,4 @@ def packets_needed(file_name: str) -> int:
 
 
 if __name__ == "__main__":
-    print(report(make_request_details("127.0.0.1", 65, 1, "test_output", 0)))
+    pass
