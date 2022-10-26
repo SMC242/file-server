@@ -2,8 +2,6 @@ from argparse import ArgumentParser
 import socket
 
 from lib import (
-    format_address,
-    RequestDetails,
     valid_file,
     packets_needed,
     qualify,
@@ -12,7 +10,7 @@ from lib import (
     send_list,
     list_files,
 )
-from request import to_fields, validate_initial, make_ack, make_list, validate_type
+from request import to_fields, validate_initial, make_ack, validate_type
 
 IP = "127.0.0.1"  # localhost
 MAX_CONNECTIONS = 5
@@ -92,7 +90,8 @@ def main():
         with client:  # Automatically close the connection
             request = read_initial_req(addr, client.recv(1024))
             if not request:
-                client.sendall(make_ack(1, "Malformed request", 0).encode("bytes"))
+                client.sendall(
+                    make_ack(1, "Malformed request", 0).encode("bytes"))
 
             success, ack = handle_request(request)
             client.sendall(ack)

@@ -5,6 +5,8 @@ from typing import TypeAlias
 import os
 from math import ceil
 
+from request import make_list, parse_list, to_fields
+
 # 1 KiB
 PACKET_SIZE = 1024
 
@@ -102,20 +104,30 @@ def list_files() -> list[str]:
     return os.listdir(qualify(""))
 
 
+def partition(n: int, xs) -> list:
+    """Return a list of slices of size `n`"""
+    return [xs[i: i + n] for i in range(0, len(xs), n)]
+
+
 def send_list(socket: socket.socket, files: list[str]) -> None:
-    file_list_bytes = ",".join(files).encode("utf-8")
-    socket.send(file_list_bytes)
+    as_bytes = make_list(files).encode("utf-8")
+    chunks = partition(PACKET_SIZE, as_bytes)
+    socket.sendall(f"n={len(chunks)}".encode("utf-8"))
+    for c in chunks:
+        socket.sendall(c)
 
 
 def receive_list(socket: socket.socket) -> None:
-    list_as_string = socket.recv(PACKET_SIZE).decode("utf-8")
-    file_list = list_as_string.split(',')
-    print_list(file_list)
+    fields = to_fields(socket.recv(PACKET_SIZE).decode("utf-8"))
+    if not fields or not fields.get("n"):
+        raise RuntimeError("Error during transmission")
 
+    buffer = b""
+    for _ in range(fields["n"]):
+        buffer += socket.recv(PACKET_SIZE)
 
-def print_list(list: list[str]) -> None:
-    for i in list:
-        print(i)
+    files = parse_list(buffer.decode("utf-8"))
+    print(f"Available files: {files}")
 
 
 def format_address(ip: str, port: int) -> FormattedAddress:
