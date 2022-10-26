@@ -70,7 +70,7 @@ def clean_report_end(report_string: str) -> str:
 
 def send_file(
     socket: socket.socket, packets: int, file_name: str
-) -> None:  # TODO: Taylor
+) -> None:
     try:
         with open(file_name, "rb") as f:
             for i in range(packets):
@@ -83,7 +83,7 @@ def send_file(
 
 def receive_file(
     socket: socket.socket, packets: int, out_path: str
-) -> None:  # TODO: Taylor
+) -> None:
     try:
         with open(out_path, "xa") as f:
             for i in range(packets):
