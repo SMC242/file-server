@@ -76,7 +76,10 @@ def get_args() -> dict:
 def main():
     REQUEST_TYPES = ("get", "put", "list")
 
-    make_directory("files")
+    try:
+        make_directory("files")
+    except (FileExistsError):
+        pass
     args = get_args()
     request_of = make_requester(args["ip"], args["port"])
     commands = {t: request_of(t) for t in REQUEST_TYPES}
