@@ -1,3 +1,7 @@
+# file-server
+
+This is a unviersity project for NOSE. We have to make a file serving service
+
 ![](https://i.postimg.cc/3W5MCf5w/file-server-logo-professionalbtw.png)
 
 # Team
