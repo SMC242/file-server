@@ -143,5 +143,9 @@ def packets_needed(file_name: str) -> int:
     return ceil(os.stat(file_name).st_size / PACKET_SIZE)
 
 
+def make_directory(name: str) -> None:
+    os.makedirs(name)
+
+
 if __name__ == "__main__":
     pass
