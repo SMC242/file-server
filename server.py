@@ -81,7 +81,10 @@ def parse_args():
 
 
 def main():
-    make_directory("files")
+    try:
+        make_directory("files")
+    except (FileExistsError):
+        pass
     args = parse_args()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind((IP, args["port"]))
