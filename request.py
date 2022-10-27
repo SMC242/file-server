@@ -4,25 +4,25 @@ This module handles formatting and parsing requests
 
 
 def make_inital_req(type: int, name: str, n: int) -> str:
-    return f"{type=} {name=} {n=}"
+    return f"{type=},{name=},{n=}"
 
 
 def make_ack(status: int, msg: str, n: int) -> str:
-    return f"{status=} {msg=} {n=}"
+    return f"{status=},{msg=},{n=}"
 
 
 def make_list(file_names: list[str]) -> str:
-    return " ".join(file_names)
+    return ",".join(file_names)
 
 
 def to_fields(msg: str) -> dict:
     """Convert a message to its fields. Use `parse_list` for list responses"""
-    split = msg.split(" ")
+    split = msg.split(",")
     return {f[0]: f[1] for f in map(lambda s: s.split("="), split)}
 
 
 def parse_list(list_response: str) -> list[str]:
-    return list_response.split(" ")
+    return list_response.split(",")
 
 
 def validate(keys: list[str]):

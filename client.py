@@ -88,10 +88,10 @@ def main():
         # NOTE: empty file paths will fall through this (on purpose)
         if args[k] is None:
             print("Executing command")
-            try:
-                return commands[k](args[k])
-            except Exception as e:
-                return print(str(e))
+            # try:
+            return commands[k](args[k])
+            # except Exception as e:
+            #     return print(str(e))
 
     # No request made
     print(
