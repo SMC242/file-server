@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import socket
 
 from request import make_inital_req, to_fields, validate_ack
-from lib import packets_needed, valid_file, PACKET_SIZE
+from lib import make_directory, packets_needed, valid_file, PACKET_SIZE
 
 
 def parse_ack(response: bytes) -> dict | None:
@@ -31,7 +31,7 @@ def make_requester(ip: str, port: int):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.connect((ip, port))
 
-                sock.send(req)  # Initial request
+                sock.send(req.encode("utf-8"))  # Initial request
                 # Receive acknowledgement
                 ack_fields = parse_ack(sock.recv(PACKET_SIZE))
                 if not ack_fields:
@@ -42,7 +42,7 @@ def make_requester(ip: str, port: int):
                 elif ack_fields["status"] == "1":
                     raise Exception(ack_fields["msg"])
 
-                # TODO: receive/send data
+        return with_arg
 
     return request_of
 
@@ -76,9 +76,13 @@ def get_args() -> dict:
 def main():
     REQUEST_TYPES = ("get", "put", "list")
 
+    try:
+        make_directory("files")
+    except (FileExistsError):
+        pass
     args = get_args()
-    request_of = make_requester(ip, port)
-    commands = {t: lambda: request_of(t) for t in REQUEST_TYPES}
+    request_of = make_requester(args["ip"], args["port"])
+    commands = {t: request_of(t) for t in REQUEST_TYPES}
 
     for k in commands:
         # NOTE: empty file paths will fall through this (on purpose)
@@ -87,7 +91,7 @@ def main():
             try:
                 return commands[k](args[k])
             except Exception as e:
-                return print(e.message)
+                return print(str(e))
 
     # No request made
     print(

@@ -2,8 +2,7 @@ from argparse import ArgumentParser
 import socket
 
 from lib import (
-    format_address,
-    RequestDetails,
+    make_directory,
     valid_file,
     packets_needed,
     qualify,
@@ -12,7 +11,7 @@ from lib import (
     send_list,
     list_files,
 )
-from request import to_fields, validate_initial, make_ack, make_list, validate_type
+from request import to_fields, validate_initial, make_ack, validate_type
 
 IP = "127.0.0.1"  # localhost
 MAX_CONNECTIONS = 5
@@ -63,14 +62,14 @@ def handle_request(fields: dict) -> tuple[bool, str]:
     return f(fields["name"])
 
 
-def transfer(type: int, packets: int, sock: socket.socket, name: str = "") -> None:
+def transfer(type: int, packets: int, sock_server: socket.socket, sock_client: socket.socket, name: str = "") -> None:
     """Do the data transfer after a successful handshake"""
     if type == 0:
-        send_file(sock, packets, qualify(name))
+        send_file(sock_server, packets, qualify(name))
     elif type == 1:
-        receive_file(sock, packets, qualify(name))
+        receive_file(sock_client, packets, qualify(name))
     else:
-        send_list(sock, list_files())
+        send_list(sock_server, list_files())
 
 
 def parse_args():
@@ -82,6 +81,10 @@ def parse_args():
 
 
 def main():
+    try:
+        make_directory("files")
+    except (FileExistsError):
+        pass
     args = parse_args()
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind((IP, args["port"]))
@@ -92,12 +95,15 @@ def main():
         with client:  # Automatically close the connection
             request = read_initial_req(addr, client.recv(1024))
             if not request:
-                client.sendall(make_ack(1, "Malformed request", 0).encode("bytes"))
+                client.sendall(
+                    make_ack(1, "Malformed request", 0).encode("bytes"))
+                return
 
             success, ack = handle_request(request)
-            client.sendall(ack)
+            client.sendall(ack.encode("utf-8"))
             if success:
-                receive(fields["type"], fields["n"])
+                transfer(request["type"], request["packets"],
+                         sock, client, request["name"])
 
 
 if __name__ == "__main__":
