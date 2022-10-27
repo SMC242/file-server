@@ -1,3 +1,7 @@
+# file-server
+
+This is a unviersity project for NOSE. We have to make a file serving service
+
 ```
     _____ __
    / __(_) /__        ________  ______   _____  _____
