@@ -1,11 +1,8 @@
-```
-    _____ __
-   / __(_) /__        ________  ______   _____  _____
-  / /_/ / / _ \______/ ___/ _ \/ ___/ | / / _ \/ ___/
- / __/ / /  __/_____(__  )  __/ /   | |/ /  __/ /
-/_/ /_/_/\___/     /____/\___/_/    |___/\___/_/
+# file-server
 
-```
+This is a unviersity project for NOSE. We have to make a file serving service
+
+![](https://i.postimg.cc/3W5MCf5w/file-server-logo-professionalbtw.png)
 
 # Team
 
