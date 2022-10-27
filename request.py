@@ -4,11 +4,11 @@ This module handles formatting and parsing requests
 
 
 def make_inital_req(type: int, name: str, n: int) -> str:
-    return f"{type=},{name=},{n=}"
+    return f"type={type},name={name},n={n}"
 
 
 def make_ack(status: int, msg: str, n: int) -> str:
-    return f"{status=},{msg=},{n=}"
+    return f"status={status},msg={msg},n={n}"
 
 
 def make_list(file_names: list[str]) -> str:

@@ -70,9 +70,7 @@ def clean_report_end(report_string: str) -> str:
     return report_string
 
 
-def send_file(
-    socket: socket.socket, packets: int, file_name: str
-) -> None:
+def send_file(socket: socket.socket, packets: int, file_name: str) -> None:
     try:
         with open(file_name, "rb") as f:
             for i in range(packets):
@@ -83,30 +81,31 @@ def send_file(
         print("file not found")
 
 
-def receive_file(
-    socket: socket.socket, packets: int, out_path: str
-) -> None:
+def receive_file(socket: socket.socket, packets: int, out_path: str) -> None:
     try:
         with open(out_path, "xb") as f:
-            for i in range(packets):
-                received_btyes = socket.recv(PACKET_SIZE)
-                f.write(received_btyes)
+            for _ in range(packets):
+                received_bytes = socket.recv(PACKET_SIZE)
+                f.write(received_bytes)
     except (FileExistsError):
         print("file already exists, cannot overwrite")
 
 
-def qualify(name: str) -> str:
-    """Prefix the file path with `files/` to avoid cluttering `/`"""
-    return f"./files/{name}"
+def make_qualifier(dir: str):
+    def qualify(name: str) -> str:
+        """Prefix the file path with `files/` to avoid cluttering `/`"""
+        return f"./{dir}/{name}"
+
+    return qualify
 
 
-def list_files() -> list[str]:
-    return os.listdir(qualify(""))
+def list_files(qualifier) -> list[str]:
+    return os.listdir(qualifier(""))
 
 
 def partition(n: int, xs) -> list:
     """Return a list of slices of size `n`"""
-    return [xs[i: i + n] for i in range(0, len(xs), n)]
+    return [xs[i : i + n] for i in range(0, len(xs), n)]
 
 
 def send_list(socket: socket.socket, files: list[str]) -> None:
@@ -134,13 +133,13 @@ def format_address(ip: str, port: int) -> FormattedAddress:
     return f"{ip}:{port}"
 
 
-def valid_file(name: str) -> bool:
-    qualified = qualify(name)
+def valid_file(qualifier, name: str) -> bool:
+    qualified = qualifier(name)
     return os.path.exists(qualified) and os.path.isfile(qualified)
 
 
-def packets_needed(file_name: str) -> int:
-    return ceil(os.stat(file_name).st_size / PACKET_SIZE)
+def packets_needed(qualifier, file_name: str) -> int:
+    return ceil(os.stat(qualifier(file_name)).st_size / PACKET_SIZE)
 
 
 def make_directory(name: str) -> None:

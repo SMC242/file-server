@@ -5,7 +5,7 @@ from lib import (
     make_directory,
     valid_file,
     packets_needed,
-    qualify,
+    make_qualifier,
     receive_file,
     send_file,
     send_list,
@@ -34,9 +34,10 @@ def read_initial_req(addr: RetAddress, response: bytes) -> dict | None:
 
 
 def handle_get(name: str) -> HandlerResponse:
-    if not valid_file(name):
+    qualify = make_qualifier("server_files")
+    if not valid_file(qualify, name):
         return (False, make_ack(1, "File not found", 0))
-    packets = packets_needed(qualify(name))
+    packets = packets_needed(qualify, name)
     return (True, make_ack(0, "", packets))
 
 
@@ -62,14 +63,21 @@ def handle_request(fields: dict) -> tuple[bool, str]:
     return f(fields["name"])
 
 
-def transfer(type: int, packets: int, sock_server: socket.socket, sock_client: socket.socket, name: str = "") -> None:
+def transfer(
+    type: int,
+    packets: int,
+    sock_server: socket.socket,
+    sock_client: socket.socket,
+    name: str = "",
+) -> None:
     """Do the data transfer after a successful handshake"""
+    qualify = make_qualifier("server_files")
     if type == 0:
-        send_file(sock_server, packets, qualify(name))
+        send_file(sock_client, packets, qualify(name))
     elif type == 1:
         receive_file(sock_client, packets, qualify(name))
     else:
-        send_list(sock_server, list_files())
+        send_list(sock_client, list_files(qualify))
 
 
 def parse_args():
@@ -82,7 +90,7 @@ def parse_args():
 
 def main():
     try:
-        make_directory("files")
+        make_directory("server_files")
     except (FileExistsError):
         pass
     args = parse_args()
@@ -95,15 +103,13 @@ def main():
         with client:  # Automatically close the connection
             request = read_initial_req(addr, client.recv(1024))
             if not request:
-                client.sendall(
-                    make_ack(1, "Malformed request", 0).encode("bytes"))
+                client.sendall(make_ack(1, "Malformed request", 0).encode("bytes"))
                 return
 
             success, ack = handle_request(request)
             client.sendall(ack.encode("utf-8"))
             if success:
-                transfer(request["type"], request["packets"],
-                         sock, client, request["name"])
+                transfer(request["type"], request["n"], sock, client, request["name"])
 
 
 if __name__ == "__main__":

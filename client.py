@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import socket
 
 from request import make_inital_req, to_fields, validate_ack
-from lib import make_directory, packets_needed, valid_file, PACKET_SIZE
+from lib import make_directory, packets_needed, valid_file, PACKET_SIZE, make_qualifier
 
 
 def parse_ack(response: bytes) -> dict | None:
@@ -17,12 +17,14 @@ def make_requester(ip: str, port: int):
     def request_of(type: str):
         # The value will either be a file path or True (if --list)
         def with_arg(arg):
+            qualify = make_qualifier("client_files")
+
             if type == "get":
                 code, name, n = 0, arg, 0
             elif type == "put":
-                if not valid_file(arg):
+                if not valid_file(qualify, arg):
                     raise ValueError("Invalid file name")
-                code, name, n = 1, arg, packets_needed(arg)
+                code, name, n = 1, arg, packets_needed(qualify, arg)
             else:
                 code, name, n = 2, "", 0
             req = make_inital_req(code, name, n)
@@ -77,7 +79,7 @@ def main():
     REQUEST_TYPES = ("get", "put", "list")
 
     try:
-        make_directory("files")
+        make_directory("client_files")
     except (FileExistsError):
         pass
     args = get_args()
@@ -86,7 +88,7 @@ def main():
 
     for k in commands:
         # NOTE: empty file paths will fall through this (on purpose)
-        if args[k] is None:
+        if args[k] is not None:
             print("Executing command")
             # try:
             return commands[k](args[k])
