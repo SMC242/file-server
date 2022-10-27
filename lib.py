@@ -1,7 +1,4 @@
 import socket
-from dataclasses import dataclass, asdict
-from enum import Enum
-from typing import TypeAlias
 import os
 from math import ceil
 
@@ -10,51 +7,23 @@ from request import make_list, parse_list, to_fields
 # 1 KiB
 PACKET_SIZE = 1024
 
-FormattedAddress: TypeAlias = str  # !TODO: remove before submitting
-
-# !TODO: remove before submitting
-
-
-class RequestType(Enum):
-    GET = 0
-    PUT = 1
-    LIST = 2
-
-
-class Status(Enum):
-    SUCCESS = 0
-    FAILURE = 1
-
-
-@dataclass
-class RequestDetails:
-    ip: str
-    port: int
-    type: RequestType
-    file_name: str | None
-    status: Status
-
 
 def make_request_details(
-    ip: str, port: int, type: int, file_name: str | None, status: int
-) -> RequestDetails:
+    ip: str, port: int, type: str, file_name: str | None, status: int
+) -> dict:
     """Use this instead of the RequestDetails constructor to make removing it easier"""
-    return RequestDetails(ip, port, RequestType(type), file_name, Status(status))
+    return {"ip": ip, "port": port, "request_type": type, "file_name": file_name, "status": status}
 
 
-def report(details: RequestDetails) -> str:
-    report_dict = asdict(details)
-    report_string = generate_report(report_dict)
+def report(details: dict) -> str:
+    report_string = generate_report(details)
     return report_string
 
 
 def generate_report(report_dict: dict) -> str:
     report_string = ""
     for key, value in report_dict.items():
-        if isinstance(value, Enum):  # Enums need to be handled slightly differently
-            report_string += append_report(key, str(value.name))
-        else:
-            report_string += append_report(key, str(value))
+        report_string += append_report(key, str(value))
     report_string = clean_report_end(report_string)
     return report_string
 
@@ -70,9 +39,9 @@ def clean_report_end(report_string: str) -> str:
     return report_string
 
 
-def send_file(socket: socket.socket, packets: int, file_name: str) -> None:
+def send_file(socket: socket.socket, packets: int, file_path: str) -> None:
     try:
-        with open(file_name, "rb") as f:
+        with open(file_path, "rb") as f:
             for i in range(packets):
                 # read a packet of data at a time
                 byte_array = f.read(PACKET_SIZE)
@@ -105,7 +74,7 @@ def list_files(qualifier) -> list[str]:
 
 def partition(n: int, xs) -> list:
     """Return a list of slices of size `n`"""
-    return [xs[i : i + n] for i in range(0, len(xs), n)]
+    return [xs[i: i + n] for i in range(0, len(xs), n)]
 
 
 def send_list(socket: socket.socket, files: list[str]) -> None:
@@ -122,15 +91,19 @@ def receive_list(socket: socket.socket) -> None:
         raise RuntimeError("Error during transmission")
 
     buffer = b""
-    for _ in range(fields["n"]):
+    for _ in range(int(fields["n"])):
         buffer += socket.recv(PACKET_SIZE)
 
     files = parse_list(buffer.decode("utf-8"))
-    print(f"Available files: {files}")
+    print(f"Available files:\n {format_list(files)}")
 
 
-def format_address(ip: str, port: int) -> FormattedAddress:
-    return f"{ip}:{port}"
+def format_list(xs: list[str]) -> str:
+    return_string = ""
+    for item in xs:
+        return_string += item + ",\n"
+
+    return return_string
 
 
 def valid_file(qualifier, name: str) -> bool:

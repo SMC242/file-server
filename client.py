@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import socket
 
 from request import make_inital_req, to_fields, validate_ack
-from lib import make_directory, packets_needed, valid_file, PACKET_SIZE, make_qualifier
+from lib import make_directory, packets_needed, receive_file, receive_list, send_file, valid_file, PACKET_SIZE, make_qualifier, make_request_details, report
 
 
 def parse_ack(response: bytes) -> dict | None:
@@ -17,14 +17,15 @@ def make_requester(ip: str, port: int):
     def request_of(type: str):
         # The value will either be a file path or True (if --list)
         def with_arg(arg):
-            qualify = make_qualifier("client_files")
+            client_qualify = make_qualifier("client_files")
+            server_qualify = make_qualifier("server_files")
 
             if type == "get":
                 code, name, n = 0, arg, 0
             elif type == "put":
-                if not valid_file(qualify, arg):
+                if not valid_file(client_qualify, arg):
                     raise ValueError("Invalid file name")
-                code, name, n = 1, arg, packets_needed(qualify, arg)
+                code, name, n = 1, arg, packets_needed(client_qualify, arg)
             else:
                 code, name, n = 2, "", 0
             req = make_inital_req(code, name, n)
@@ -44,6 +45,20 @@ def make_requester(ip: str, port: int):
                 elif ack_fields["status"] == "1":
                     raise Exception(ack_fields["msg"])
 
+                if (type == "get"):
+                    receive_file(sock, packets_needed(
+                        server_qualify, arg), client_qualify(arg))
+                elif (type == "put"):
+                    send_file(sock, packets_needed(
+                        client_qualify, arg), client_qualify(arg))
+                elif (type == "list"):
+                    receive_list(sock)
+                else:
+                    print("unknown command type")
+
+                request_details = make_request_details(
+                    ip, port, type, arg if type != "list" else "N/A", int(ack_fields["status"]))
+                print(report(request_details))
         return with_arg
 
     return request_of
@@ -75,6 +90,11 @@ def get_args() -> dict:
     return vars(parser.parse_args())
 
 
+def to_request(request_name: str) -> int:
+    status_dict = {"get": 0, "put": 1, "list": 2}
+    return status_dict[request_name]
+
+
 def main():
     REQUEST_TYPES = ("get", "put", "list")
 
@@ -92,6 +112,7 @@ def main():
             print("Executing command")
             # try:
             return commands[k](args[k])
+
             # except Exception as e:
             #     return print(str(e))
 

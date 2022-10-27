@@ -3,13 +3,15 @@ import socket
 
 from lib import (
     make_directory,
+    make_request_details,
+    report,
     valid_file,
     packets_needed,
     make_qualifier,
     receive_file,
     send_file,
     send_list,
-    list_files,
+    list_files
 )
 from request import to_fields, validate_initial, make_ack, validate_type
 
@@ -71,13 +73,15 @@ def transfer(
     name: str = "",
 ) -> None:
     """Do the data transfer after a successful handshake"""
-    qualify = make_qualifier("server_files")
+    server_qualify = make_qualifier("server_files")
+    client_qualify = make_qualifier("client_files")
     if type == 0:
-        send_file(sock_client, packets, qualify(name))
+        send_file(sock_client, packets_needed(
+            server_qualify, name), server_qualify(name))
     elif type == 1:
-        receive_file(sock_client, packets, qualify(name))
+        receive_file(sock_client, packets, server_qualify(name))
     else:
-        send_list(sock_client, list_files(qualify))
+        send_list(sock_client, list_files(server_qualify))
 
 
 def parse_args():
@@ -86,6 +90,11 @@ def parse_args():
         "port", type=int, help="The port that the server should listen on"
     )
     return vars(parser.parse_args())
+
+
+def to_request(request_name: int) -> str:
+    status_dict = {0: "get", 1: "put", 2: "list"}
+    return status_dict[request_name]
 
 
 def main():
@@ -103,13 +112,18 @@ def main():
         with client:  # Automatically close the connection
             request = read_initial_req(addr, client.recv(1024))
             if not request:
-                client.sendall(make_ack(1, "Malformed request", 0).encode("bytes"))
+                client.sendall(
+                    make_ack(1, "Malformed request", 0).encode("bytes"))
                 return
 
             success, ack = handle_request(request)
             client.sendall(ack.encode("utf-8"))
             if success:
-                transfer(request["type"], request["n"], sock, client, request["name"])
+                transfer(request["type"], request["n"],
+                         sock, client, request["name"])
+                request_details = make_request_details(
+                    addr[0], addr[1], to_request(request["type"]), request["name"] if request["name"] != "" else "N/A", 0 if success else 1)
+                print(report(request_details))
 
 
 if __name__ == "__main__":
